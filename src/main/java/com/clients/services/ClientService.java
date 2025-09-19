@@ -3,8 +3,13 @@ package com.clients.services;
 import com.clients.dto.ClientDTO;
 import com.clients.entities.Client;
 import com.clients.repositories.ClientRepository;
+import com.clients.services.exceptions.DatabaseException;
+import com.clients.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -24,7 +29,8 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public ClientDTO findById(Long id) {
-        Client client = clientRepository.findById(id).get();
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Resource not founded!"));
         return new ClientDTO(client);
     }
 
@@ -38,10 +44,15 @@ public class ClientService {
 
     @Transactional
     public ClientDTO update(Long id, ClientDTO clientDTO) {
-        Client client = clientRepository.getReferenceById(id);
-        copyDtotoEntity(clientDTO, client);
-        client = clientRepository.save(client);
-        return  new ClientDTO(client);
+        try {
+            Client client = clientRepository.getReferenceById(id);
+            copyDtotoEntity(clientDTO, client);
+            client = clientRepository.save(client);
+            return  new ClientDTO(client);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Resource not founded!");
+        }
+
     }
 
     private void copyDtotoEntity(ClientDTO clientDTO, Client client) {
@@ -52,9 +63,16 @@ public class ClientService {
         client.setChildren(clientDTO.getChildren());
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
-        clientRepository.deleteById(id);
+        if (!clientRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Resource not founded!");
+        }
+        try {
+            clientRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+          throw new DatabaseException("Failed integrity referential integrity");
+        }
     }
 
 }
