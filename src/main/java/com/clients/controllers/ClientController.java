@@ -1,5 +1,6 @@
 package com.clients.controllers;
 
+import com.clients.dto.ClientDTO;
 import com.clients.entities.Client;
 import com.clients.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,23 +16,23 @@ public class ClientController {
     private ClientService clientService;
 
     @GetMapping
-    public List<Client> findAll() {
+    public List<ClientDTO> findAll() {
         return clientService.findAll();
     }
 
     @GetMapping(value = "/{id}")
-    public Client findById(@PathVariable Long id) {
+    public ClientDTO findById(@PathVariable Long id) {
         return clientService.findById(id);
     }
 
     @PostMapping
-    public Client insert(@RequestBody Client client) {
-        return clientService.insert(client);
+    public ClientDTO insert(@RequestBody ClientDTO clientDTO) {
+        return clientService.insert(clientDTO);
     }
 
     @PutMapping(value = "/{id}")
-    public Client update(@PathVariable Long id, Client client) {
-        return clientService.update(id, client);
+    public ClientDTO update(@PathVariable Long id, ClientDTO clientDTO) {
+        return clientService.update(id, clientDTO);
     }
 
     @DeleteMapping(value = "/{id}")
