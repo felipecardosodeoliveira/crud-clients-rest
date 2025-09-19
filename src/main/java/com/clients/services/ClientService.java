@@ -8,11 +8,11 @@ import com.clients.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class ClientService {
@@ -20,11 +20,9 @@ public class ClientService {
     private ClientRepository clientRepository;
 
     @Transactional(readOnly = true)
-    public List<ClientDTO> findAll() {
-        return clientRepository.findAll()
-                .stream()
-                .map(ClientDTO::new)
-                .toList();
+    public Page<ClientDTO> findAll(Pageable pageable) {
+        Page<Client> result = clientRepository.findAll(pageable);
+        return result.map(ClientDTO::new);
     }
 
     @Transactional(readOnly = true)
