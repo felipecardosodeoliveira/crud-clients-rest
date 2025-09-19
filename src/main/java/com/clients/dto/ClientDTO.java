@@ -2,12 +2,16 @@ package com.clients.dto;
 
 import java.time.LocalDate;
 import com.clients.entities.Client;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
 
 public class ClientDTO {
     private Long id;
+    @NotBlank(message = "Field 'name' should not be blank!")
     private String name;
     private String cpf;
     private Double income;
+    @PastOrPresent(message = "Field 'birthData' should not be in the future")
     private LocalDate birthDate;
     private Integer children;
 
